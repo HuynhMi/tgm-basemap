@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+      // ============================================
+      // HIGHCHARTS MAP LAZY LOADER
+      // ============================================
+      // Delays loading Highcharts library until user interaction
+      // to improve initial page load performance
+
+      // Configuration
+      const CONFIG = {
+        INIT_DELAY: 3500, // ms to wait before auto-init
+        MIN_WIDTH: 540, // only init on desktop/tablet
+        HIGHCHARTS_URL: "https://code.highcharts.com/maps/highmaps.js",
+        TOPOLOGY_URL: "./base_map_global_1.topo.json",
+        // TOPOLOGY_URL: "./map2.topo.json",
+        CONTAINER_ID: "container",
+      };
+
+      // ============================================
+      // INITIALIZATION LOGIC
+      // ============================================
+
+      let isInitialized = false;
+
+      // Only run on larger screens
+      if (window.innerWidth > CONFIG.MIN_WIDTH) {
+        // Auto-init after delay
+        setTimeout(initHighChart, CONFIG.INIT_DELAY);
+
+        // Or init on first user interaction
+        const events = ["scroll", "mousemove", "touchstart"];
+        events.forEach((event) => {
+          document.addEventListener(event, handleUserInteraction, {
+            once: true,
+          });
+        });
+      }
+
+      function handleUserInteraction() {
+        initHighChart();
+      }
+
+      function initHighChart() {
+        if (isInitialized) return;
+
+        isInitialized = true;
+        console.log("Initializing Highcharts map...");
+
+        const script = document.createElement("script");
+        script.type = "text/javascript";
+        script.async = true;
+        script.src = CONFIG.HIGHCHARTS_URL;
+        script.onload = renderMap;
+
+        document.head.appendChild(script);
+      }
+
+      // ============================================
+      // MAP RENDERING
+      // ============================================
+
+      async function renderMap() {
+        try {
+          // Fetch world topology data
+          const topology = await fetch(CONFIG.TOPOLOGY_URL).then((res) =>
+            res.json(),
+          );
+
+          // const mapChart = Highcharts.geojson(topology);
+
+          console.log("topo", topology);
+          // Create custom tooltip element
+          const tooltipDiv = createTooltipElement();
+
+          // Initialize Highcharts map
+          Highcharts.mapChart(CONFIG.CONTAINER_ID, {
+            accessibility: {
+              description: "Interactive world map showing panel online data",
+            },
+
+            chart: {
+              map: topology,
+              backgroundColor: "#ffffff",
+              borderWidth: 0,
+              margin: [null, 20, null, null],
+              marginRight: 20,
+              style: { fontFamily: "Roboto" },
+              events: {
+                load: function () {
+                  setupCustomTooltip(this, tooltipDiv);
+                },
+              },
+            },
+
+            // Responsive breakpoints
+            responsive: {
+              rules: [
+                {
+                  condition: { maxWidth: 480 },
+                  chartOptions: { chart: { height: 300 } },
+                },
+                {
+                  condition: { minWidth: 481, maxWidth: 1024 },
+                  chartOptions: { chart: { height: 500 } },
+                },
+                {
+                  condition: { minWidth: 1024 },
+                  chartOptions: { chart: { height: 700 } },
+                },
+              ],
+            },
+
+            credits: {
+              enabled: true,
+              href: "https://tgmresearch.com/",
+              text: "tgmresearch.com",
+            },
+
+            legend: { enabled: false },
+
+            mapNavigation: {
+              enabled: true,
+              buttonOptions: {
+                align: "right",
+                verticalAlign: "bottom",
+                x: 0,
+                y: 100,
+              },
+            },
+
+            mapView: {
+              projection: { name: "Miller" },
+            },
+
+            plotOptions: {
+              mapline: {
+                enableMouseTracking: false,
+                showInLegend: true,
+              },
+              series: {
+                cursor: "pointer",
+                events: {
+                  click: (e) => window.open(e.point.url),
+                },
+              },
+            },
+
+            series: [
+              {
+                // mapChart,
+                data: [
+                  {
+                    code: "ALB",
+                    con: "Albania",
+                    po: 2745972,
+                    mb: 87.71,
+                    au: 4090,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-albanii.html",
+                  },
+                  {
+                    code: "DZA",
+                    con: "Algieria",
+                    po: 45606480,
+                    mb: 66.98,
+                    au: 29094,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-algierii.html",
+                  },
+                  {
+                    code: "ARG",
+                    con: "Argentyna",
+                    po: 46654581,
+                    mb: 77.47,
+                    au: 87208,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-argentynie.html",
+                  },
+                  {
+                    code: "AUS",
+                    con: "Australia",
+                    po: 26638544,
+                    mb: 91.38,
+                    au: 63817,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-australii.html",
+                  },
+                  {
+                    code: "AUT",
+                    con: "Austria",
+                    po: 9132383,
+                    mb: 93,
+                    au: 43381,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-austrii.html",
+                  },
+                  {
+                    code: "AZE",
+                    con: "Azerbejdżan",
+                    po: 10112555,
+                    mb: 78,
+                    au: 7178,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-azerbejdzanie.html",
+                  },
+                  {
+                    code: "BHS",
+                    con: "Bahamas",
+                    po: 412623,
+                    mb: 82,
+                    au: 2350,
+                    url: "https://tgmresearch.com/online-panel-in-bahamas.html",
+                  },
+                  {
+                    code: "BHR",
+                    con: "Bahrajn",
+                    po: 1485509,
+                    mb: 83.87,
+                    au: 3856,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-bahrajnie.html",
+                  },
+                  {
+                    code: "BGD",
+                    con: "Bangladesz",
+                    po: 172954319,
+                    mb: 59.03,
+                    au: 74572,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-bangladeszu.html",
+                  },
+                  {
+                    code: "BEL",
+                    con: "Belgia",
+                    po: 11822592,
+                    mb: 92.97,
+                    au: 42600,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-belgii.html",
+                  },
+                  {
+                    code: "BOL",
+                    con: "Boliwia",
+                    po: 12388571,
+                    mb: 61.76,
+                    au: 13116,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-boliwii.html",
+                  },
+                  {
+                    code: "BIH",
+                    con: "Bośnia i Hercegowina",
+                    po: 3210847,
+                    mb: 76.24,
+                    au: 12421,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-bosni-i-hercegowinie.html",
+                  },
+                  {
+                    code: "BWA",
+                    con: "Botswana",
+                    po: 2675352,
+                    mb: 52.37,
+                    au: 20167,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-botswanie.html",
+                  },
+                  {
+                    code: "BRA",
+                    con: "Brazylia",
+                    po: 216422446,
+                    mb: 73.74,
+                    au: 356056,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-brazylii.html",
+                  },
+                  {
+                    code: "BRN",
+                    con: "Brunei",
+                    po: 452524,
+                    mb: 70.06,
+                    au: 2259,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-brunei.html",
+                  },
+                  {
+                    code: "BGR",
+                    con: "Bułgaria",
+                    po: 6430370,
+                    mb: 81.66,
+                    au: 42233,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-bulgarii.html",
+                  },
+                  {
+                    code: "KHM",
+                    con: "Kambodża",
+                    po: 16944826,
+                    mb: 63.11,
+                    au: 6516,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kambodzy.html",
+                  },
+                  {
+                    code: "CMR",
+                    con: "Kamerun",
+                    po: 28647293,
+                    mb: 47.41,
+                    au: 32791,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kamerunie.html",
+                  },
+                  {
+                    code: "CAN",
+                    con: "Kanada",
+                    po: 40097761,
+                    mb: 89.22,
+                    au: 87695,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kanadzie.html",
+                  },
+                  {
+                    code: "CHL",
+                    con: "Chile",
+                    po: 19629590,
+                    mb: 77.81,
+                    au: 52126,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-chile.html",
+                  },
+                  {
+                    code: "CHN",
+                    con: "Chiny",
+                    po: 1410710000,
+                    mb: 87.91,
+                    au: 153114,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-chinach.html",
+                  },
+                  {
+                    code: "COL",
+                    con: "Kolumbia",
+                    po: 52085168,
+                    mb: 71.19,
+                    au: 165023,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kolumbii.html",
+                  },
+                  {
+                    code: "CRI",
+                    con: "Kostaryka",
+                    po: 5212173,
+                    mb: 76.53,
+                    au: 10104,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-kostaryce.html",
+                  },
+                  {
+                    code: "HRV",
+                    con: "Chorwacja",
+                    po: 3853200,
+                    mb: 79.04,
+                    au: 26030,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-chorwacji.html",
+                  },
+                  {
+                    code: "CYP",
+                    con: "Cyprus",
+                    po: 1260138,
+                    mb: 90.83,
+                    au: 2832,
+                    url: "https://tgmresearch.com/online-panel-in-cyprus.html",
+                  },
+                  {
+                    code: "CZE",
+                    con: "Republika Czeska",
+                    po: 10873689,
+                    mb: 93.3,
+                    au: 64029,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-czechach.html",
+                  },
+                  {
+                    code: "DNK",
+                    con: "Dania",
+                    po: 5946952,
+                    mb: 93.5,
+                    au: 23286,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-danii.html",
+                  },
+                  {
+                    code: "DOM",
+                    con: "Republika Dominikany",
+                    po: 11332972,
+                    mb: 76.01,
+                    au: 15971,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-dominikanie.html",
+                  },
+                  {
+                    code: "ECU",
+                    con: "Ekwador",
+                    po: 18190484,
+                    mb: 66.87,
+                    au: 20576,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-ekwadorze.html",
+                  },
+                  {
+                    code: "EGY",
+                    con: "Egipt",
+                    po: 112716598,
+                    mb: 69.06,
+                    au: 73782,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-egipcie.html",
+                  },
+                  {
+                    code: "SLV",
+                    con: "Zbawiciel",
+                    po: 6364943,
+                    mb: 54.5,
+                    au: 12124,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-salwadorze.html",
+                  },
+                  {
+                    code: "EST",
+                    con: "Estonia",
+                    po: 1366188,
+                    mb: 84.78,
+                    au: 11052,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-estonii.html",
+                  },
+                  {
+                    code: "ETH",
+                    con: "Etiopia",
+                    po: 126527060,
+                    mb: 33.66,
+                    au: 38386,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-etiopii.html",
+                  },
+                  {
+                    code: "FIN",
+                    con: "Finlandia",
+                    po: 5584264,
+                    mb: 92.72,
+                    au: 42848,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-finlandii.html",
+                  },
+                  {
+                    code: "FRA",
+                    con: "Francja",
+                    po: 68170228,
+                    mb: 95.78,
+                    au: 179818,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-we-francji.html",
+                  },
+                  {
+                    code: "GEO",
+                    con: "Gruzja",
+                    po: 3760365,
+                    mb: 80.84,
+                    au: 8086,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-gruzji.html",
+                  },
+                  {
+                    code: "GHA",
+                    con: "Ghana",
+                    po: 34121985,
+                    mb: 55.49,
+                    au: 96670,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-ghanie.html",
+                  },
+                  {
+                    code: "GRC",
+                    con: "Grecja",
+                    po: 10361295,
+                    mb: 93.46,
+                    au: 35088,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-grecji.html",
+                  },
+                  {
+                    code: "GTM",
+                    con: "Gwatemala",
+                    po: 17602431,
+                    mb: 50.86,
+                    au: 5041,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-gwatemali.html",
+                  },
+                  {
+                    code: "HND",
+                    con: "Honduras",
+                    po: 10593798,
+                    mb: 48.66,
+                    au: 5055,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-hondurasie.html",
+                  },
+                  {
+                    code: "HKG",
+                    con: "Hongkong",
+                    po: 7536100,
+                    mb: 96.56,
+                    au: 17188,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-hong-kongu.html",
+                  },
+                  {
+                    code: "HUN",
+                    con: "Węgry",
+                    po: 9589872,
+                    mb: 85.2,
+                    au: 50800,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-wegrzech.html",
+                  },
+                  {
+                    code: "ISL",
+                    con: "Islandia",
+                    po: 393600,
+                    mb: 81.41,
+                    au: 2964,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-islandii.html",
+                  },
+                  {
+                    code: "IND",
+                    con: "Indie",
+                    po: 1428627663,
+                    mb: 65.21,
+                    au: 357717,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-indiach.html",
+                  },
+                  {
+                    code: "IDN",
+                    con: "Indonezja",
+                    po: 277534122,
+                    mb: 58.04,
+                    au: 271175,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-indonezji.html",
+                  },
+                  {
+                    code: "IRL",
+                    con: "Irlandia",
+                    po: 5262382,
+                    mb: 85.82,
+                    au: 13824,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-irlandii.html",
+                  },
+                  {
+                    code: "ISR",
+                    con: "Izrael",
+                    po: 9756700,
+                    mb: 80.09,
+                    au: 17523,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-izraelu.html",
+                  },
+                  {
+                    code: "ITA",
+                    con: "Włochy",
+                    po: 58761146,
+                    mb: 93.98,
+                    au: 156035,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-we-wloszech.html",
+                  },
+                  {
+                    code: "CIV",
+                    con: "Wybrzeże Kości Słoniowej",
+                    po: 28873034,
+                    mb: 50.1,
+                    au: 16280,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-wybrzezu-kosci-sloniowej.html",
+                  },
+                  {
+                    code: "JAM",
+                    con: "Jamaica",
+                    po: 2825544,
+                    mb: 75.19,
+                    au: 3485,
+                    url: "https://tgmresearch.com/online-panel-in-jamaica.html",
+                  },
+                  {
+                    code: "JPN",
+                    con: "Japonia",
+                    po: 124516650,
+                    mb: 90.91,
+                    au: 205370,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-japonii.html",
+                  },
+                  {
+                    code: "JOR",
+                    con: "Jordania",
+                    po: 11337052,
+                    mb: 74.35,
+                    au: 8550,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-jordanii.html",
+                  },
+                  {
+                    code: "KAZ",
+                    con: "Kazachstan",
+                    po: 19900177,
+                    mb: 60.01,
+                    au: 17720,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kazachstanie.html",
+                  },
+                  {
+                    code: "KEN",
+                    con: "Kenia",
+                    po: 55100586,
+                    mb: 57.61,
+                    au: 211139,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kenii.html",
+                  },
+                  {
+                    code: "KWT",
+                    con: "Kuwejt",
+                    po: 4310108,
+                    mb: 93.87,
+                    au: 3082,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-kuwejcie.html",
+                  },
+                  {
+                    code: "LAO",
+                    con: "Laos",
+                    po: 7633779,
+                    mb: 56.67,
+                    au: 4121,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-laosie.html",
+                  },
+                  {
+                    code: "LTU",
+                    con: "Litwa",
+                    po: 2871897,
+                    mb: 87.84,
+                    au: 38017,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-litwie.html",
+                  },
+                  {
+                    code: "LUX",
+                    con: "Luxembourg",
+                    po: 668606,
+                    mb: 91.87,
+                    au: 2790,
+                    url: "https://tgmresearch.com/online-panel-in-luxembourg.html",
+                  },
+                  {
+                    code: "MYS",
+                    con: "Malezja",
+                    po: 34308525,
+                    mb: 79.99,
+                    au: 78161,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-malezji.html",
+                  },
+                  {
+                    code: "MLT",
+                    con: "Malta",
+                    po: 553214,
+                    mb: 73.41,
+                    au: 2815,
+                    url: "https://tgmresearch.com/online-panel-in-malta.html",
+                  },
+                  {
+                    code: "MEX",
+                    con: "Meksyk",
+                    po: 128455567,
+                    mb: 78.27,
+                    au: 157274,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-meksyku.html",
+                  },
+                  {
+                    code: "MDA",
+                    con: "Moldova",
+                    po: 2486891,
+                    mb: 100,
+                    au: 10709,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-moldawii.html",
+                  },
+                  {
+                    code: "MNG",
+                    con: "Mongolia",
+                    po: 3447157,
+                    mb: 80.86,
+                    au: 4468,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-mongolii.html",
+                  },
+                  {
+                    code: "MNE",
+                    con: "Czarnogóra",
+                    po: 616177,
+                    mb: 81.25,
+                    au: 3133,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-czarnogorze.html",
+                  },
+                  {
+                    code: "MAR",
+                    con: "Maroko",
+                    po: 37840044,
+                    mb: 71.11,
+                    au: 88458,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-maroku.html",
+                  },
+                  {
+                    code: "MOZ",
+                    con: "Mozambik",
+                    po: 33897354,
+                    mb: 39.62,
+                    au: 9568,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-mozambiku.html",
+                  },
+                  {
+                    code: "MMR",
+                    con: "Myanmar",
+                    po: 54577997,
+                    mb: 58.32,
+                    au: 17137,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-birmie.html",
+                  },
+                  {
+                    code: "NAM",
+                    con: "Namibia",
+                    po: 2604172,
+                    mb: 41.03,
+                    au: 14800,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-namibii.html",
+                  },
+                  {
+                    code: "NPL",
+                    con: "Nepal",
+                    po: 30896590,
+                    mb: 71.14,
+                    au: 7663,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-nepalu.html",
+                  },
+                  {
+                    code: "NLD",
+                    con: "Holandia",
+                    po: 17879488,
+                    mb: 91.12,
+                    au: 42554,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-holandii.html",
+                  },
+                  {
+                    code: "NZL",
+                    con: "Nowa Zelandia",
+                    po: 5223100,
+                    mb: 86.46,
+                    au: 16888,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-nowej-zelandii.html",
+                  },
+                  {
+                    code: "NIC",
+                    con: "Nikaragua",
+                    po: 7046310,
+                    mb: 54.05,
+                    au: 9805,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-nikaragui.html",
+                  },
+                  {
+                    code: "NGA",
+                    con: "Nigeria",
+                    po: 223804632,
+                    mb: 48.47,
+                    au: 249523,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-nigerii.html",
+                  },
+                  {
+                    code: "MKD",
+                    con: "Macedonia Północna",
+                    po: 1811980,
+                    mb: 74.74,
+                    au: 3905,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-macedonii-polnocnej.html",
+                  },
+                  {
+                    code: "NOR",
+                    con: "Norwegia",
+                    po: 5519594,
+                    mb: 89.05,
+                    au: 17412,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-norwegii.html",
+                  },
+                  {
+                    code: "OMN",
+                    con: "Oman",
+                    po: 4644384,
+                    mb: 90.76,
+                    au: 5374,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-omanie.html",
+                  },
+                  {
+                    code: "PAK",
+                    con: "Pakistan",
+                    po: 240485658,
+                    mb: 40.4,
+                    au: 278343,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-pakistanie.html",
+                  },
+                  {
+                    code: "PSE",
+                    con: "Palestyna",
+                    po: 5044000,
+                    mb: 0,
+                    au: 2975,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-palestynie.html",
+                  },
+                  {
+                    code: "PAN",
+                    con: "Panama",
+                    po: 4468087,
+                    mb: 85.31,
+                    au: 7048,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-panamie.html",
+                  },
+                  {
+                    code: "PRY",
+                    con: "Paragwaj",
+                    po: 6861524,
+                    mb: 73.92,
+                    au: 8673,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-paragwaju.html",
+                  },
+                  {
+                    code: "PER",
+                    con: "Peru",
+                    po: 34352719,
+                    mb: 67.5,
+                    au: 40709,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-peru.html",
+                  },
+                  {
+                    code: "PHL",
+                    con: "Filipiny",
+                    po: 117337368,
+                    mb: 55.76,
+                    au: 279396,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-filipinach.html",
+                  },
+                  {
+                    code: "POL",
+                    con: "Polska",
+                    po: 36685849,
+                    mb: 74.55,
+                    au: 152185,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-polsce.html",
+                  },
+                  {
+                    code: "PRT",
+                    con: "Portugalia",
+                    po: 10525347,
+                    mb: 93.51,
+                    au: 98822,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-portugalii.html",
+                  },
+                  {
+                    code: "PRI",
+                    con: "Portoryko",
+                    po: 3205691,
+                    mb: 0,
+                    au: 3065,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-portoryko.html",
+                  },
+                  {
+                    code: "QAT",
+                    con: "Katar",
+                    po: 2716391,
+                    mb: 100,
+                    au: 4254,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-katarze.html",
+                  },
+                  {
+                    code: "ROU",
+                    con: "Rumunia",
+                    po: 19056116,
+                    mb: 77.88,
+                    au: 145609,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-rumunii.html",
+                  },
+                  {
+                    code: "RWA",
+                    con: "Rwanda",
+                    po: 14094683,
+                    mb: 47.84,
+                    au: 11962,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-rwandzie.html",
+                  },
+                  {
+                    code: "SAU",
+                    con: "Arabia Saudyjska (KSA)",
+                    po: 36947025,
+                    mb: 77.19,
+                    au: 53032,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-arabii-saudyjskiej-ksa.html",
+                  },
+                  {
+                    code: "SEN",
+                    con: "Senegal",
+                    po: 17763163,
+                    mb: 45.99,
+                    au: 11163,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-senegalu.html",
+                  },
+                  {
+                    code: "SRB",
+                    con: "Serbia",
+                    po: 6618026,
+                    mb: 100,
+                    au: 35326,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-serbii.html",
+                  },
+                  {
+                    code: "SGP",
+                    con: "Singapur",
+                    po: 5917648,
+                    mb: 93.99,
+                    au: 32442,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-singapurze.html",
+                  },
+                  {
+                    code: "SVK",
+                    con: "Słowacja",
+                    po: 5426740,
+                    mb: 84.65,
+                    au: 38256,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-slowacji.html",
+                  },
+                  {
+                    code: "SVN",
+                    con: "Słowenia",
+                    po: 2120937,
+                    mb: 89.87,
+                    au: 16322,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-slowenii.html",
+                  },
+                  {
+                    code: "ZAF",
+                    con: "Afryka Południowa",
+                    po: 60414495,
+                    mb: 77.07,
+                    au: 167445,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-afryce-poludniowej.html",
+                  },
+                  {
+                    code: "KOR",
+                    con: "Korea Południowa",
+                    po: 51712619,
+                    mb: 95.11,
+                    au: 73795,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-korei-poludniowej.html",
+                  },
+                  {
+                    code: "ESP",
+                    con: "Hiszpania",
+                    po: 48373336,
+                    mb: 94.66,
+                    au: 153696,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-hiszpanii.html",
+                  },
+                  {
+                    code: "LKA",
+                    con: "Sri Lanka",
+                    po: 22037000,
+                    mb: 62.28,
+                    au: 34089,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-sri-lance.html",
+                  },
+                  {
+                    code: "SWE",
+                    con: "Szwecja",
+                    po: 10536632,
+                    mb: 91.99,
+                    au: 88064,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-szwecji.html",
+                  },
+                  {
+                    code: "CHE",
+                    con: "Szwajcaria",
+                    po: 8849852,
+                    mb: 94.22,
+                    au: 22163,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-szwajcarii.html",
+                  },
+                  {
+                    code: "TWN",
+                    con: "Tajwan",
+                    po: 23420000,
+                    mb: 0,
+                    au: 21096,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-tajwanie.html",
+                  },
+                  {
+                    code: "TZA",
+                    con: "Tanzania",
+                    po: 67438106,
+                    mb: 47.53,
+                    au: 14109,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-tanzanii.html",
+                  },
+                  {
+                    code: "THA",
+                    con: "Tajlandia",
+                    po: 71801279,
+                    mb: 77.02,
+                    au: 86261,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-tajlandii.html",
+                  },
+                  {
+                    code: "TTO",
+                    con: "Trinidad and Tobago",
+                    po: 1534937,
+                    mb: 68.31,
+                    au: 3200,
+                    url: "https://tgmresearch.com/online-panel-in-trinidad-and-tobago.html",
+                  },
+                  {
+                    code: "TUN",
+                    con: "Tunezja",
+                    po: 12458223,
+                    mb: 73.92,
+                    au: 13491,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-tunezji.html",
+                  },
+                  {
+                    code: "TUR",
+                    con: "Turcja",
+                    po: 85326000,
+                    mb: 78.51,
+                    au: 79964,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-turcji.html",
+                  },
+                  {
+                    code: "TKM",
+                    con: "Turkmenia",
+                    po: 6516100,
+                    mb: 0,
+                    au: 4974,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-turkmenistanie.html",
+                  },
+                  {
+                    code: "UGA",
+                    con: "Uganda",
+                    po: 48582334,
+                    mb: 45.65,
+                    au: 52490,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-ugandzie.html",
+                  },
+                  {
+                    code: "GBR",
+                    con: "Wielka Brytania (UK)",
+                    po: 68350000,
+                    mb: 92.3,
+                    au: 185052,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-wielkiej-brytanii-uk.html",
+                  },
+                  {
+                    code: "UKR",
+                    con: "Ukraina",
+                    po: 37000000,
+                    mb: 85.71,
+                    au: 194642,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-ukrainie.html",
+                  },
+                  {
+                    code: "ARE",
+                    con: "Zjednoczone Emiraty Arabskie (ZEA)",
+                    po: 9516871,
+                    mb: 92.87,
+                    au: 31432,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-zjednoczonych-emiratach-arabskich-zea.html",
+                  },
+                  {
+                    code: "USA",
+                    con: "Stany Zjednoczone (USA)",
+                    po: 334914895,
+                    mb: 90.93,
+                    au: 373479,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-stanach-zjednoczonych-usa.html",
+                  },
+                  {
+                    code: "URY",
+                    con: "Urugwaj",
+                    po: 3423108,
+                    mb: 79.87,
+                    au: 8271,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-urugwaju.html",
+                  },
+                  {
+                    code: "UZB",
+                    con: "Uzbekistan",
+                    po: 36412350,
+                    mb: 60.55,
+                    au: 9452,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-uzbekistanie.html",
+                  },
+                  {
+                    code: "VNM",
+                    con: "Wietnam",
+                    po: 98858950,
+                    mb: 64.4,
+                    au: 53761,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-wietnamie.html",
+                  },
+                  {
+                    code: "ZMB",
+                    con: "Zambia",
+                    po: 20569737,
+                    mb: 41.36,
+                    au: 29935,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-zambii.html",
+                  },
+                  {
+                    code: "DEU",
+                    con: "Niemcy",
+                    po: 84482267,
+                    mb: 92.1,
+                    au: 182442,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-w-niemczech.html",
+                  },
+                  {
+                    code: "LVA",
+                    con: "Łotwa",
+                    po: 1881750,
+                    mb: 90.69,
+                    au: 13671,
+                    url: "https://tgmresearch.pl/panel-online-badania-rynku-na-lotwie.html",
+                  },
+                ],
+                name: " ",
+                type: "map",
+                joinBy: ["iso-a3", "code"],
+                color: "#C2CAE7",
+                nullColor: "#E6E8ED",
+                borderColor: "white",
+                borderWidth: 0.5,
+                showInLegend: false,
+                states: {
+                  hover: {
+                    color: "#9D87CC",
+                    borderColor: "white",
+                    enabled: true,
+                  },
+                },
+                dataLabels: {
+                  enabled: true,
+                  format: "{.0f}",
+                  style: { fontWeight: "light" },
+                  filter: {
+                    operator: ">",
+                    property: "labelrank",
+                    value: 250,
+                  },
+                },
+              },
+            ],
+
+            title: {
+              text: " ",
+              style: { fontWeight: "light" },
+            },
+
+            tooltip: {
+              enabled: true,
+              useHTML: true,
+              backgroundColor: "none",
+              style: { fontWeight: "light" },
+              formatter: formatTooltipContent,
+              positioner: function () {
+                return {
+                  x: this.chart.plotLeft,
+                  y: this.chart.plotHeight - this.label.height,
+                };
+              },
+            },
+          });
+        } catch (error) {
+          console.error("Failed to render map:", error);
+        }
+      }
+
+      // ============================================
+      // TOOLTIP UTILITIES
+      // ============================================
+
+      function createTooltipElement() {
+        const div = document.createElement("div");
+        Object.assign(div.style, {
+          position: "absolute",
+          pointerEvents: "none",
+          backgroundColor: "white",
+          color: "black",
+          padding: "5px",
+          borderRadius: "3px",
+          boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, 0.25)",
+          fontFamily: "Roboto",
+          fontWeight: "500",
+          fontSize: "11px",
+          maxWidth: "150px",
+          display: "none",
+        });
+        document.body.appendChild(div);
+        return div;
+      }
+
+      function setupCustomTooltip(chart, tooltipDiv) {
+        chart.container.onmouseover = (e) => {
+          if (chart.hoverPoint) {
+            tooltipDiv.style.display = "block";
+            tooltipDiv.style.left = e.pageX + "px";
+            tooltipDiv.style.top = e.pageY + 20 + "px";
+            tooltipDiv.innerHTML = `Kliknij, aby poznać szczegóły dotyczące panelu online w <b style="color:#68499D">${chart.hoverPoint.con}</b>`;
+          } else {
+            tooltipDiv.style.display = "none";
+          }
+        };
+
+        chart.container.onmouseleave = () => {
+          tooltipDiv.style.display = "none";
+        };
+      }
+
+      function formatTooltipContent() {
+        const point = this.point;
+
+        return `
+    <div style="display:flex; flex-direction:column; gap:10px">
+      ${renderCountryHeader(point)}
+      ${renderMetric("Populacja", point.po, populationIcon)}
+      ${renderMetric("Penetracja mobilna", point.mb, mobileIcon, true)}
+      ${renderMetric("Aktywna publiczność", point.au, audienceIcon)}
+    </div>
+  `;
+      }
+
+      function renderCountryHeader(point) {
+        return `
+    <div style="vertical-align:middle;">
+      <span class="f32" style="vertical-align:middle">
+        <span class="flag ${point.properties["hc-key"]}"></span>
+      </span>
+      <span style="font-size:16px;vertical-align:middle">${point.con}</span>
+    </div>
+  `;
+      }
+
+      function renderMetric(label, value, icon, isPercentage = false) {
+        const formattedValue = isPercentage
+          ? formatPercentage(value)
+          : formatNumber(value);
+
+        return `
+    <div style="display:flex; align-items:center; gap:15px;">
+      <span style="">${icon}</span>
+      <span style="display:flex; flex-direction:column; min-width:0; flex:1">
+        <span style="font-size:11px; color:#8C8C8C; font-weight:300">${label}</span><br>
+        <span style="font-size:24px; color:#68499D; font-weight:300; margin-top:-16px">${formattedValue}</span>
+      </span>
+    </div>
+  `;
+      }
+
+      // ============================================
+      // FORMATTING UTILITIES
+      // ============================================
+
+      function formatNumber(n) {
+        if (n > 1e9) return (n / 1e9).toFixed(2) + "b";
+        if (n > 1e6) return (n / 1e6).toFixed(2) + "m";
+        if (n > 1e3) return (n / 1e3).toFixed(0) + "k";
+        return n;
+      }
+
+      function formatPercentage(n) {
+        return n === 0 ? "NA" : Highcharts.numberFormat(n, 0) + "%";
+      }
+
+      // ============================================
+      // SVG ICONS
+      // ============================================
+
+      const populationIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="30"  fill="none"><path d="M10.9378 11.6665C13.3541 11.6665 15.3128 9.70778 15.3128 7.2916C15.3128 4.87544 13.3541 2.91675 10.9378 2.91675C8.52159 2.91675 6.56283 4.87544 6.56283 7.2916C6.56283 9.70778 8.52159 11.6665 10.9378 11.6665ZM2.91699 15.7031C2.91699 14.2793 4.07125 13.1251 5.49509 13.1251H12.4474C11.9511 13.9831 11.667 14.9792 11.667 16.0417C11.667 17.784 12.4308 19.3479 13.6419 20.4167H12.0576C10.3268 20.4167 8.85047 21.5061 8.27676 23.0365C6.09114 22.5023 4.73651 21.3104 3.93908 19.9832C2.9169 18.2817 2.91698 16.531 2.91699 16.2272V15.7031ZM23.3338 16.0417C23.3338 14.9792 23.0499 13.9831 22.5534 13.1251H29.5056C30.9294 13.1251 32.0837 14.2793 32.0837 15.7031V16.2272C32.0837 16.531 32.0838 18.2817 31.0615 19.9832C30.2641 21.3104 28.9094 22.5023 26.7238 23.0365C26.1501 21.5061 24.6739 20.4167 22.9431 20.4167H21.3589C22.5701 19.3479 23.3338 17.784 23.3338 16.0417ZM28.4378 7.2916C28.4378 9.70778 26.4791 11.6665 24.0628 11.6665C21.6465 11.6665 19.6878 9.70778 19.6878 7.2916C19.6878 4.87544 21.6465 2.91675 24.0628 2.91675C26.4791 2.91675 28.4378 4.87544 28.4378 7.2916ZM9.47949 24.4531C9.47949 23.0294 10.6337 21.8751 12.0576 21.8751H22.9431C24.3669 21.8751 25.5212 23.0294 25.5212 24.4531V24.9772C25.5212 25.281 25.5213 27.0317 24.499 28.7332C23.418 30.5328 21.3124 32.0834 17.5003 32.0834C13.6882 32.0834 11.5828 30.5328 10.5016 28.7332C9.4794 27.0317 9.47948 25.281 9.47949 24.9772V24.4531ZM17.5003 20.4165C19.9166 20.4165 21.8753 18.4578 21.8753 16.0416C21.8753 13.6254 19.9166 11.6667 17.5003 11.6667C15.084 11.6667 13.1253 13.6254 13.1253 16.0416C13.1253 18.4578 15.084 20.4165 17.5003 20.4165Z" fill="#565656"/></svg>`;
+
+      const mobileIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="35" viewBox="0 0 36 36" fill="none"><path d="M32.4 9.8998C32.4 14.3733 28.7735 17.9998 24.3 17.9998C19.8265 17.9998 16.2 14.3733 16.2 9.8998C16.2 5.4263 19.8265 1.7998 24.3 1.7998C28.7735 1.7998 32.4 5.4263 32.4 9.8998ZM28.5365 6.56341C28.1849 6.21193 27.6151 6.21193 27.2635 6.56341L22.5 11.327L21.3365 10.1634C20.9849 9.81193 20.4151 9.81193 20.0635 10.1634C19.7122 10.5149 19.7122 11.0847 20.0635 11.4362L21.8635 13.2362C22.2151 13.5877 22.7849 13.5877 23.1365 13.2362L28.5365 7.83619C28.8878 7.48473 28.8878 6.91488 28.5365 6.56341ZM11.7 3.5998H16.6629C15.2493 5.3115 14.4 7.50647 14.4 9.8998C14.4 15.3674 18.8323 19.7998 24.3 19.7998C25.236 19.7998 26.1418 19.6698 27 19.4272V29.6998C27 31.1909 25.7911 32.3998 24.3 32.3998H11.7C10.2088 32.3998 9 31.1909 9 29.6998V6.2998C9 4.80863 10.2088 3.5998 11.7 3.5998ZM14.4 26.0998C14.4 26.5968 14.8029 26.9998 15.3 26.9998H20.7C21.197 26.9998 21.6 26.5968 21.6 26.0998C21.6 25.6028 21.197 25.1998 20.7 25.1998H15.3C14.8029 25.1998 14.4 25.6028 14.4 26.0998Z" fill="#565656"/></svg>`;
+
+      const audienceIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="35" viewBox="0 0 34 34" fill="none"><path d="M11.333 15.5833C14.4626 15.5833 16.9997 13.0463 16.9997 9.91667C16.9997 6.78705 14.4626 4.25 11.333 4.25C8.20339 4.25 5.66634 6.78705 5.66634 9.91667C5.66634 13.0463 8.20339 15.5833 11.333 15.5833ZM24.083 15.5833C26.4303 15.5833 28.333 13.6805 28.333 11.3333C28.333 8.98613 26.4303 7.08333 24.083 7.08333C21.7357 7.08333 19.833 8.98613 19.833 11.3333C19.833 13.6805 21.7357 15.5833 24.083 15.5833ZM6.02051 18.4167C4.2601 18.4167 2.83301 19.8438 2.83301 21.6042V21.9583C2.83301 21.9583 2.83301 28.3333 11.333 28.3333C13.302 28.3333 14.8149 27.9912 15.9773 27.4656C15.7208 26.6193 15.583 25.7216 15.583 24.7917C15.583 22.4444 16.4612 20.3024 17.907 18.6761C17.5202 18.5092 17.0936 18.4167 16.6455 18.4167H6.02051ZM32.583 24.7917C32.583 29.0949 29.0946 32.5833 24.7913 32.5833C20.4881 32.5833 16.9997 29.0949 16.9997 24.7917C16.9997 20.4884 20.4881 17 24.7913 17C29.0946 17 32.583 20.4884 32.583 24.7917ZM28.5404 21.4574L23.3747 26.6233L21.0423 24.2907C20.7656 24.0142 20.3171 24.0142 20.0404 24.2907C19.7639 24.5674 19.7639 25.0159 20.0404 25.2926L22.8737 28.1259C23.1504 28.4025 23.5989 28.4025 23.8756 28.1259L29.5423 22.4593C29.8188 22.1826 29.8188 21.7341 29.5423 21.4574C29.2656 21.1809 28.8171 21.1809 28.5404 21.4574Z" fill="#565656"/></svg>`;
+    </script>
+  </body>
+</html>
