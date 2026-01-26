@@ -19,7 +19,7 @@
         INIT_DELAY: 3500, // ms to wait before auto-init
         MIN_WIDTH: 540, // only init on desktop/tablet
         HIGHCHARTS_URL: "https://code.highcharts.com/maps/highmaps.js",
-        TOPOLOGY_URL: "./base_map_global_1.topo.json",
+        TOPOLOGY_URL: "./map10.json",
         // TOPOLOGY_URL: "./map2.topo.json",
         CONTAINER_ID: "container",
       };
@@ -1104,7 +1104,8 @@
                 ],
                 name: " ",
                 type: "map",
-                joinBy: ["iso-a3", "code"],
+                // keys: ["ISO_CC", "code"],
+                joinBy: ["ISO_CC", "code"],
                 color: "#C2CAE7",
                 nullColor: "#E6E8ED",
                 borderColor: "white",
