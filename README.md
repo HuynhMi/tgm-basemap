@@ -38,6 +38,7 @@ This guide describes the process of converting shapefiles into optimized TopoJSO
   - Option: **`keep-shapes`**
 - This reduces file size while maintaining visual quality
   ![alt text](image-3.png)
+  simplify 10% keep-shapes
 
 ### 6. Export TopoJSON
 
